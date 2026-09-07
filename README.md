@@ -4,6 +4,8 @@ A responsive Vue 3 project-planning interface with milestone tracking, a drag-an
 
 Architecture, route semantics, security requirements, and delivery gates are documented in [`docs/phase-1-architecture-and-delivery.md`](docs/phase-1-architecture-and-delivery.md).
 
+The Supabase relational schema, deployment procedure, and expected verification results are documented in [`docs/database-schema.md`](docs/database-schema.md).
+
 ## Run locally
 
 ```bash
