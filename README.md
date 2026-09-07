@@ -1,6 +1,8 @@
 # Northstar Project Planner
 
-A responsive, private project-planning interface with milestone tracking, a drag-and-drop task board, filters, automatic progress, overdue cues, and browser-local persistence.
+A responsive Vue 3 project-planning interface with milestone tracking, a drag-and-drop task board, filters, automatic progress, overdue cues, and browser-local persistence. Supabase authentication and per-user cloud persistence are planned for the next Phase 1 increment.
+
+Architecture, route semantics, security requirements, and delivery gates are documented in [`docs/phase-1-architecture-and-delivery.md`](docs/phase-1-architecture-and-delivery.md).
 
 ## Run locally
 
