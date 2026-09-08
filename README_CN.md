@@ -11,7 +11,7 @@
 
 ## 
 
-![Northstar workspace preview](images/preview.png)
+![Northstar workspace preview](images/Preview.png)
 
 工作台由三个相互关联的规划层级组成：
 
