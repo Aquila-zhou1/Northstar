@@ -6,6 +6,8 @@ Architecture, route semantics, security requirements, and delivery gates are doc
 
 The Supabase relational schema, deployment procedure, and expected verification results are documented in [`docs/database-schema.md`](docs/database-schema.md).
 
+Per-user RLS policies and executable isolation tests are documented in [`docs/user-isolation.md`](docs/user-isolation.md).
+
 ## Run locally
 
 ```bash
