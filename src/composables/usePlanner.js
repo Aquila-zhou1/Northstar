@@ -1,6 +1,6 @@
 import { computed, reactive, ref } from 'vue';
-import { clone, defaultState, progressForTasks, statusConfig, uid } from '../domain/planner';
-import { localPlannerRepository } from '../services/plannerRepository';
+import { clone, defaultState, progressForTasks, statusConfig } from '../domain/planner';
+import { plannerRepository } from '../services/plannerRepository';
 
 const state = reactive(clone(defaultState));
 const activeMilestone = ref('all');
@@ -9,16 +9,24 @@ const ready = ref(false);
 const toastMessage = ref('');
 let toastTimer;
 
-async function initialize() {
-  Object.assign(state, await localPlannerRepository.load());
-  ready.value = true;
+function replaceWorkspace(workspace) {
+  state.projectId = workspace.projectId;
+  state.projectName = workspace.projectName;
+  state.projectDescription = workspace.projectDescription;
+  state.milestones = workspace.milestones;
+  state.tasks = workspace.tasks;
 }
 
-async function persist(message = 'Progress saved') {
-  await localPlannerRepository.save(state);
+function showToast(message) {
   toastMessage.value = message;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { toastMessage.value = ''; }, 1800);
+}
+
+async function initialize() {
+  ready.value = false;
+  replaceWorkspace(await plannerRepository.loadWorkspace());
+  ready.value = true;
 }
 
 const overall = computed(() => progressForTasks(state.tasks));
@@ -37,41 +45,58 @@ function selectMilestone(id) {
 
 async function saveTask(payload, taskId) {
   const existing = state.tasks.find(task => task.id === taskId);
-  if (existing) Object.assign(existing, payload);
-  else state.tasks.push({ id: uid('task'), ...payload });
-  await persist(existing ? 'Task updated' : 'Task added');
+  if (existing) {
+    Object.assign(existing, await plannerRepository.updateTask(state.projectId, taskId, payload));
+    showToast('Task updated');
+    return;
+  }
+
+  const sortOrder = state.tasks.filter(task => task.milestoneId === payload.milestoneId).length;
+  state.tasks.push(await plannerRepository.createTask(state.projectId, payload, sortOrder));
+  showToast('Task added');
 }
 
 async function deleteTask(taskId) {
+  await plannerRepository.deleteTask(state.projectId, taskId);
   state.tasks = state.tasks.filter(task => task.id !== taskId);
-  await persist('Task deleted');
+  showToast('Task deleted');
 }
 
 async function moveTask(taskId, status) {
   const task = state.tasks.find(item => item.id === taskId);
   if (!task || task.status === status) return;
-  task.status = status;
-  await persist(`Moved to ${statusConfig.find(item => item.id === status).label}`);
+  Object.assign(task, await plannerRepository.moveTask(state.projectId, taskId, status));
+  showToast(`Moved to ${statusConfig.find(item => item.id === status).label}`);
 }
 
 async function saveMilestone(payload, milestoneId) {
   const existing = state.milestones.find(milestone => milestone.id === milestoneId);
-  if (existing) Object.assign(existing, payload);
-  else state.milestones.push({ id: uid('milestone'), ...payload });
-  await persist(existing ? 'Milestone updated' : 'Milestone added');
+  if (existing) {
+    Object.assign(existing, await plannerRepository.updateMilestone(state.projectId, milestoneId, payload));
+    showToast('Milestone updated');
+    return;
+  }
+
+  state.milestones.push(await plannerRepository.createMilestone(
+    state.projectId,
+    payload,
+    state.milestones.length
+  ));
+  showToast('Milestone added');
 }
 
 async function deleteMilestone(milestoneId) {
+  await plannerRepository.deleteMilestone(state.projectId, milestoneId);
   state.milestones = state.milestones.filter(milestone => milestone.id !== milestoneId);
   if (activeMilestone.value === milestoneId) activeMilestone.value = 'all';
-  await persist('Milestone deleted');
+  showToast('Milestone deleted');
 }
 
 async function resetWorkspace() {
-  Object.assign(state, clone(defaultState));
+  replaceWorkspace(await plannerRepository.resetWorkspace(state.projectId));
   activeMilestone.value = 'all';
   query.value = '';
-  await persist('Workspace reset');
+  showToast('Workspace reset');
 }
 
 export function usePlanner() {

@@ -1,6 +1,6 @@
 # Northstar 第一阶段：架构、路由与交付基线
 
-> 状态：Vue 重构、Supabase Schema、用户隔离 RLS 与邮箱 OTP 认证已建立；云端 Repository、完整页面状态与部署尚未实施。本文是第一阶段的人类可读实施契约，后续代码与验收以本文为准。
+> 状态：Vue 重构、Supabase Schema、RLS、邮箱 OTP 与云端 Repository 已建立；完整页面状态与部署尚未实施。本文是第一阶段的人类可读实施契约，后续代码与验收以本文为准。
 
 ## 1. 第一阶段目标与完成定义
 
@@ -34,8 +34,8 @@
 
 - 改造前：Vite + 原生 JavaScript + 单一 `src/main.js` 命令式渲染 + 全局 CSS。
 - 改造后当前状态：Vue 3 + Vue Router；页面、领域逻辑、状态编排与持久化适配器分层。
-- 当前持久化仍为 `localStorage`，这是有意保留的过渡适配器，用于证明 Vue 重构不改变业务行为。
-- 当前 `/app` 的 `requiresAuth` 暂为 `false`；认证接入完成时必须改为 `true` 并启用全局路由守卫。
+- 当前持久化为 Supabase 关系表；`localStorage` 数据路径已移除，不执行隐式旧数据迁移。
+- `/app` 已设置 `requiresAuth: true` 并由全局路由守卫保护。
 
 ## 3. 目标架构与依赖方向
 
@@ -47,7 +47,7 @@ usePlanner compos/usePlanner composable
         │ 业务动作与响应式状态
         ▼
 Planner repository contract
-        │ 当前：localStorage；目标：Supabase
+        │ 当前：Supabase row-level CRUD + lifecycle RPC
         ▼
 Supabase Data API + PostgreSQL RLS
 
@@ -62,7 +62,7 @@ Vue Router ── auth guard ── Supabase Auth session
 |---|---|---|
 | `src/main.js` | 创建 Vue 应用并注册路由 | 业务状态、DOM 拼接 |
 | `src/App` | 根路由出口 | 规划业务逻辑 |
-| `src/router/index.js` | 路由表；下一步增加认证守卫 | 数据库 CRUD |
+| `src/router/index.js` | 路由表与认证守卫 | 数据库 CRUD |
 | `src/domain/planner.js` | 默认数据、状态配置、纯计算、ID/日期规则 | Vue API、网络请求 |
 | `src/services/plannerRepository.js` | 当前本地持久化适配器；下一步由 Supabase 实现替换 | Toast、弹窗、路由跳转 |
 | `src/composables/usePlanner.js` | 聚合响应式状态、筛选和用户业务动作 | HTML 与视觉细节 |
@@ -175,27 +175,29 @@ session expired → anonymous + redirect 保存原目标
 - [x] Vue 3 与 Vue Router 作为运行依赖。
 - [x] `/` 重定向 `/app`；工作台成为路由视图。
 - [x] 领域纯函数、Repository、Composable、View、Components 分层。
-- [x] 现有 `localStorage` 键保持不变，避免重构导致本地数据丢失。
+- [x] Vue 重构阶段曾保留原 `localStorage` 键以完成回归；云端接入后已移除正式读写路径。
 - [x] 正式构建通过；浏览器桌面交互回归通过，控制台无错误。
 - [ ] 移动端视口回归（在认证页面加入后统一执行，避免重复验收）。
 
 ### 后续：认证与数据库
 
-- [ ] Supabase 环境和变量配置。
+- [x] Supabase 环境和变量配置。
 - [x] Schema migration：表、关系约束、字段约束、索引和更新时间触发器。
 - [x] 三张业务表启用 RLS，客户端角色默认锁闭。
 - [x] Schema 契约测试与人工验证手册。
-- [ ] migration 在目标 Supabase 项目执行并通过契约测试（需要项目访问凭据）。
+- [x] Schema migration 在目标 Supabase 项目执行并通过契约测试。
 - [x] `authenticated` 最小 grants 与 12 条用户隔离 RLS policies。
 - [x] RLS 结构契约测试与双用户 CRUD 隔离测试。
-- [ ] RLS migration 在目标项目执行并通过两层测试。
+- [x] RLS migration 在目标项目执行并通过两层测试。
 - [x] Supabase Client、Auth 会话状态与路由守卫。
 - [x] `/signup`、`/login`、`/verify` 邮箱 OTP 页面。
 - [x] 注册/登录创建语义、六位码校验、重发冷却和退出入口。
-- [ ] 邮件模板配置与真实邮箱端到端验收。
-- [ ] Auth store、启动会话恢复和路由守卫。
-- [ ] 注册/登录/验证 UI 及 OTP 错误状态。
-- [ ] Supabase repository 替换本地 repository。
+- [x] 邮件模板配置；注册、错误码、正确码和退出路径人工抽查通过。
+- [x] Auth store、启动会话恢复和路由守卫。
+- [x] 注册/登录/验证 UI 及 OTP 错误状态。
+- [x] Supabase repository 替换本地 repository。
+- [x] 首次初始化与重置使用数据库原子化 RPC。
+- [ ] 云端 CRUD、跨浏览器一致性和 A/B 隔离人工验收。
 - [ ] A/B 用户隔离测试。
 - [ ] Vercel 预览与生产部署、线上冒烟测试。
 

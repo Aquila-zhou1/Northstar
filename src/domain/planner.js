@@ -1,5 +1,3 @@
-export const STORAGE_KEY = 'northstar-planner-v1';
-
 export const statusConfig = [
   { id: 'planned', label: 'Planned', color: '#a9a59a' },
   { id: 'progress', label: 'In progress', color: '#dd8455' },
