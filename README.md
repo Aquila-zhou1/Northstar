@@ -8,6 +8,8 @@ The Supabase relational schema, deployment procedure, and expected verification 
 
 Per-user RLS policies and executable isolation tests are documented in [`docs/user-isolation.md`](docs/user-isolation.md).
 
+Email OTP setup, route behavior, and end-to-end acceptance tests are documented in [`docs/email-otp-auth.md`](docs/email-otp-auth.md).
+
 ## Run locally
 
 ```bash

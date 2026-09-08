@@ -1,6 +1,6 @@
 # Northstar 第一阶段：架构、路由与交付基线
 
-> 状态：Vue 重构、Supabase Schema 与用户隔离 RLS migration 已建立；认证 UI、云端 Repository 与部署尚未实施。本文是第一阶段的人类可读实施契约，后续代码与验收以本文为准。
+> 状态：Vue 重构、Supabase Schema、用户隔离 RLS 与邮箱 OTP 认证已建立；云端 Repository、完整页面状态与部署尚未实施。本文是第一阶段的人类可读实施契约，后续代码与验收以本文为准。
 
 ## 1. 第一阶段目标与完成定义
 
@@ -189,6 +189,10 @@ session expired → anonymous + redirect 保存原目标
 - [x] `authenticated` 最小 grants 与 12 条用户隔离 RLS policies。
 - [x] RLS 结构契约测试与双用户 CRUD 隔离测试。
 - [ ] RLS migration 在目标项目执行并通过两层测试。
+- [x] Supabase Client、Auth 会话状态与路由守卫。
+- [x] `/signup`、`/login`、`/verify` 邮箱 OTP 页面。
+- [x] 注册/登录创建语义、六位码校验、重发冷却和退出入口。
+- [ ] 邮件模板配置与真实邮箱端到端验收。
 - [ ] Auth store、启动会话恢复和路由守卫。
 - [ ] 注册/登录/验证 UI 及 OTP 错误状态。
 - [ ] Supabase repository 替换本地 repository。

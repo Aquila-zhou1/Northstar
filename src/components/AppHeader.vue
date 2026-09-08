@@ -1,5 +1,6 @@
 <script setup>
-defineEmits(['reset', 'add-milestone', 'add-task']);
+defineProps({ userEmail: { type: String, default: '' } });
+defineEmits(['reset', 'add-milestone', 'add-task', 'sign-out']);
 </script>
 
 <template>
@@ -15,6 +16,7 @@ defineEmits(['reset', 'add-milestone', 'add-task']);
       <span class="private-pill">Private</span>
     </div>
     <div class="top-actions">
+      <span v-if="userEmail" class="account-email" :title="userEmail">{{ userEmail }}</span>
       <button class="icon-btn" title="Reset demo data" aria-label="Reset demo data" @click="$emit('reset')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" />
@@ -28,6 +30,12 @@ defineEmits(['reset', 'add-milestone', 'add-task']);
       </button>
       <button class="primary-btn" @click="$emit('add-task')">
         <span class="plus">+</span><span class="button-label">Add task</span>
+      </button>
+      <button class="ghost-btn sign-out-btn" title="Log out" aria-label="Log out" @click="$emit('sign-out')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 17l5-5-5-5" /><path d="M15 12H3" /><path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" />
+        </svg>
+        <span>Log out</span>
       </button>
     </div>
   </header>

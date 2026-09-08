@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppHeader from '../components/AppHeader.vue';
 import MilestoneEditorModal from '../components/MilestoneEditorModal.vue';
 import MilestoneList from '../components/MilestoneList.vue';
@@ -8,8 +9,11 @@ import ResetModal from '../components/ResetModal.vue';
 import TaskBoard from '../components/TaskBoard.vue';
 import TaskEditorModal from '../components/TaskEditorModal.vue';
 import { usePlanner } from '../composables/usePlanner';
+import { useAuth } from '../composables/useAuth';
 
 const planner = usePlanner();
+const auth = useAuth();
+const router = useRouter();
 const taskEditorId = ref(undefined);
 const milestoneEditorId = ref(undefined);
 const resetOpen = ref(false);
@@ -47,12 +51,23 @@ async function confirmReset() {
   resetOpen.value = false;
 }
 
+async function signOut() {
+  await auth.signOut();
+  await router.replace({ name: 'login' });
+}
+
 onMounted(planner.initialize);
 </script>
 
 <template>
   <div class="shell">
-    <AppHeader @reset="resetOpen = true" @add-milestone="openMilestone()" @add-task="openTask()" />
+    <AppHeader
+      :user-email="auth.user.value?.email || ''"
+      @reset="resetOpen = true"
+      @add-milestone="openMilestone()"
+      @add-task="openTask()"
+      @sign-out="signOut"
+    />
     <main v-if="planner.ready.value">
       <ProjectOverview
         :project-name="planner.state.projectName"
