@@ -29,4 +29,12 @@ Then open the local URL shown by Vite.
 npm run build
 ```
 
+Run the production build and repository/browser-secret release gate together:
+
+```bash
+npm run check:release
+```
+
+Release safety checks and expected browser verification results are documented in [`docs/release-readiness.md`](docs/release-readiness.md).
+
 Project data is stored in Supabase and isolated by the authenticated user. Local browser storage is used only by the Supabase client to persist the login session.
