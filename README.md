@@ -12,6 +12,8 @@ Email OTP setup, route behavior, and end-to-end acceptance tests are documented 
 
 Cloud data mapping, workspace lifecycle RPCs, and persistence acceptance tests are documented in [`docs/cloud-planner-data.md`](docs/cloud-planner-data.md).
 
+Loading, saving, failure recovery, empty-workspace, and expired-session acceptance tests are documented in [`docs/resilient-ui-states.md`](docs/resilient-ui-states.md).
+
 ## Run locally
 
 ```bash

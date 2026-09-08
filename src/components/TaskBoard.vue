@@ -2,11 +2,12 @@
 import { ref } from 'vue';
 import { formatDate, isOverdue, priorityColor, statusConfig } from '../domain/planner';
 
-defineProps({
+const props = defineProps({
   milestones: { type: Array, required: true },
   tasks: { type: Array, required: true },
   query: { type: String, required: true },
-  activeMilestone: { type: String, required: true }
+  activeMilestone: { type: String, required: true },
+  busy: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:query', 'update:activeMilestone', 'edit-task', 'move-task']);
@@ -18,7 +19,7 @@ function milestoneName(id, milestones) {
 }
 
 function dropTask(status) {
-  if (draggedTaskId.value) emit('move-task', draggedTaskId.value, status);
+  if (!props.busy && draggedTaskId.value) emit('move-task', draggedTaskId.value, status);
   draggedTaskId.value = null;
   dragOverStatus.value = null;
 }
@@ -36,9 +37,9 @@ function dropTask(status) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.8-3.8" />
           </svg>
-          <input class="search-input" :value="query" placeholder="Search tasks…" @input="$emit('update:query', $event.target.value)" />
+          <input class="search-input" :value="query" placeholder="Search tasks…" :disabled="busy" @input="$emit('update:query', $event.target.value)" />
         </label>
-        <select class="filter-select" aria-label="Filter by milestone" :value="activeMilestone" @change="$emit('update:activeMilestone', $event.target.value)">
+        <select class="filter-select" aria-label="Filter by milestone" :value="activeMilestone" :disabled="busy" @change="$emit('update:activeMilestone', $event.target.value)">
           <option value="all">All milestones</option>
           <option v-for="milestone in milestones" :key="milestone.id" :value="milestone.id">{{ milestone.name }}</option>
         </select>
@@ -64,17 +65,17 @@ function dropTask(status) {
             v-for="task in tasks.filter(item => item.status === column.id)"
             :key="task.id"
             class="task-card"
-            draggable="true"
+            :draggable="!busy"
             tabindex="0"
             :aria-label="task.title"
-            @dragstart="draggedTaskId = task.id"
+            @dragstart="!busy && (draggedTaskId = task.id)"
             @dragend="draggedTaskId = null; dragOverStatus = null"
-            @dblclick="$emit('edit-task', task.id)"
-            @keydown.enter="$emit('edit-task', task.id)"
+            @dblclick="!busy && $emit('edit-task', task.id)"
+            @keydown.enter="!busy && $emit('edit-task', task.id)"
           >
             <div class="task-top">
               <span class="task-milestone">{{ milestoneName(task.milestoneId, milestones) }}</span>
-              <button class="task-menu" aria-label="Edit task" @click.stop="$emit('edit-task', task.id)">•••</button>
+              <button class="task-menu" aria-label="Edit task" :disabled="busy" @click.stop="$emit('edit-task', task.id)">•••</button>
             </div>
             <div class="task-name">{{ task.title }}</div>
             <div class="task-foot">

@@ -16,6 +16,9 @@ const email = ref('');
 const pending = ref(false);
 const errorMessage = ref('');
 const isSignup = computed(() => props.intent === 'signup');
+const sessionNotice = computed(() => route.query.reason === 'session-expired'
+  ? 'Your session expired. Log in again to continue.'
+  : '');
 
 async function submit() {
   if (pending.value) return;
@@ -47,6 +50,7 @@ async function submit() {
     <p class="auth-eyebrow">{{ isSignup ? 'Create your workspace' : 'Welcome back' }}</p>
     <h1 class="auth-title">{{ isSignup ? 'Start planning clearly.' : 'Continue your plan.' }}</h1>
     <p class="auth-copy">Enter your email and we’ll send you a six-digit verification code. No password needed.</p>
+    <p v-if="sessionNotice" class="form-notice" role="status">{{ sessionNotice }}</p>
 
     <form class="auth-form" @submit.prevent="submit">
       <div class="field">

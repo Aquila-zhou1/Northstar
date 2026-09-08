@@ -4,7 +4,8 @@ import { formatDate, progressForTasks } from '../domain/planner';
 defineProps({
   milestones: { type: Array, required: true },
   tasks: { type: Array, required: true },
-  activeMilestone: { type: String, required: true }
+  activeMilestone: { type: String, required: true },
+  busy: { type: Boolean, default: false }
 });
 
 defineEmits(['select', 'edit']);
@@ -32,15 +33,15 @@ function milestoneStats(milestoneId, tasks) {
         class="milestone-card"
         :class="{ active: activeMilestone === milestone.id }"
         tabindex="0"
-        @click="$emit('select', milestone.id)"
-        @keydown.enter="$emit('select', milestone.id)"
-        @keydown.space.prevent="$emit('select', milestone.id)"
+        @click="!busy && $emit('select', milestone.id)"
+        @keydown.enter="!busy && $emit('select', milestone.id)"
+        @keydown.space.prevent="!busy && $emit('select', milestone.id)"
       >
         <div class="milestone-top">
           <span class="milestone-index">M{{ String(index + 1).padStart(2, '0') }}</span>
           <span class="milestone-actions">
             <span class="milestone-date">{{ formatDate(milestone.date, true) }}</span>
-            <button class="milestone-edit" :aria-label="`Edit ${milestone.name}`" @click.stop="$emit('edit', milestone.id)">•••</button>
+            <button class="milestone-edit" :aria-label="`Edit ${milestone.name}`" :disabled="busy" @click.stop="$emit('edit', milestone.id)">•••</button>
           </span>
         </div>
         <div class="milestone-name">{{ milestone.name }}</div>

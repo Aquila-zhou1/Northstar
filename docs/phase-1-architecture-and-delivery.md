@@ -1,6 +1,6 @@
 # Northstar 第一阶段：架构、路由与交付基线
 
-> 状态：Vue 重构、Supabase Schema、RLS、邮箱 OTP 与云端 Repository 已建立；完整页面状态与部署尚未实施。本文是第一阶段的人类可读实施契约，后续代码与验收以本文为准。
+> 状态：Vue 重构、Supabase Schema、RLS、邮箱 OTP、云端 Repository 与完整页面状态已建立；安全检查和部署尚未实施。本文是第一阶段的人类可读实施契约，后续代码与验收以本文为准。
 
 ## 1. 第一阶段目标与完成定义
 
@@ -64,7 +64,7 @@ Vue Router ── auth guard ── Supabase Auth session
 | `src/App` | 根路由出口 | 规划业务逻辑 |
 | `src/router/index.js` | 路由表与认证守卫 | 数据库 CRUD |
 | `src/domain/planner.js` | 默认数据、状态配置、纯计算、ID/日期规则 | Vue API、网络请求 |
-| `src/services/plannerRepository.js` | 当前本地持久化适配器；下一步由 Supabase 实现替换 | Toast、弹窗、路由跳转 |
+| `src/services/plannerRepository.js` | Supabase 行级 CRUD、工作区初始化与重置适配 | Toast、弹窗、路由跳转 |
 | `src/composables/usePlanner.js` | 聚合响应式状态、筛选和用户业务动作 | HTML 与视觉细节 |
 | `src/views/PlannerView.vue` | 页面级编排与弹窗生命周期 | 数据源细节 |
 | `src/components/*` | 可复用展示及局部交互 | 全局会话和跨页导航 |
@@ -197,15 +197,20 @@ session expired → anonymous + redirect 保存原目标
 - [x] 注册/登录/验证 UI 及 OTP 错误状态。
 - [x] Supabase repository 替换本地 repository。
 - [x] 首次初始化与重置使用数据库原子化 RPC。
-- [ ] 云端 CRUD、跨浏览器一致性和 A/B 隔离人工验收。
-- [ ] A/B 用户隔离测试。
+- [x] 云端 CRUD、跨浏览器一致性和 A/B 隔离人工验收。
+- [x] A/B 用户隔离测试。
+- [x] 首次加载、加载失败与重试状态。
+- [x] 保存中防重复提交、失败保留表单与明确错误提示。
+- [x] 空工作区恢复入口与会话失效回登录页。
+- [ ] 第七步页面状态人工验收。
+- [ ] 正式构建、浏览器控制台、密钥与旧数据源安全检查。
 - [ ] Vercel 预览与生产部署、线上冒烟测试。
 
 ## 12. 工程决策记录
 
 1. **现在迁移 Vue，而不是认证后再迁移**：当前应用较小；先建立组件和数据边界，可避免 Supabase 逻辑继续堆入命令式单文件。
 2. **暂不引入 Pinia**：第一阶段只有认证与单工作区两类状态，Composable 足够；出现跨多视图复杂缓存时再评估。
-3. **先保留 Repository 接口下的 `localStorage`**：重构与数据迁移解耦，可分别验证；它不是最终数据源。
+3. **迁移期间曾保留 Repository 接口下的 `localStorage`**：重构与数据迁移因此可以分别验证；第六步已由 Supabase 实现替换并移除正式读写路径。
 4. **采用 Vue Router history 模式**：URL 语义清晰；部署必须提供 SPA fallback。
 5. **数据库关系化而非整份 JSON**：支持 RLS、单行更新、AI 结构化建议和未来多项目，且避免并发覆盖整份规划。
 6. **授权落在数据库**：前端守卫仅改善体验，RLS 才是安全边界。

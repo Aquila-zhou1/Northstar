@@ -52,8 +52,8 @@ async function verifyEmailOtp(email, token) {
   return data.session;
 }
 
-async function signOut() {
-  const { error } = await supabase.auth.signOut();
+async function signOut(scope = 'global') {
+  const { error } = await supabase.auth.signOut({ scope });
   if (error) throw error;
   session.value = null;
 }

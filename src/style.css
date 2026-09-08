@@ -80,6 +80,8 @@ button:disabled { cursor: not-allowed; opacity: .58; transform: none !important;
 
 .top-actions { display: flex; gap: 9px; }
 .account-email { align-self: center; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 12px; }
+.saving-indicator { align-self: center; display: inline-flex; align-items: center; gap: 7px; color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.saving-indicator > span { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1s ease-in-out infinite; }
 .icon-btn, .ghost-btn, .primary-btn {
   border: 0;
   border-radius: 11px;
@@ -236,6 +238,18 @@ h1 { margin: 0; font-family: 'Manrope', sans-serif; font-size: clamp(38px, 5.4vw
 .danger-btn { border: 0; background: transparent; color: #a14b3f; padding: 9px 0; font-size: 12px; font-weight: 700; cursor: pointer; }
 .locked-note { color: var(--muted); font-size: 11px; max-width: 210px; }
 .modal-right { display: flex; gap: 8px; margin-left: auto; }
+.modal-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+
+.workspace-state { min-height: calc(100vh - 76px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 12vh; color: var(--muted); }
+.workspace-state .state-title { max-width: 620px; margin-top: 18px; color: var(--ink); font-size: clamp(30px, 5vw, 48px); }
+.workspace-state p { max-width: 470px; margin: 13px 0 23px; line-height: 1.6; }
+.state-spinner { width: 38px; height: 38px; border: 3px solid rgba(49, 91, 70, .15); border-top-color: var(--green); border-radius: 50%; animation: spin .85s linear infinite; }
+.state-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; color: #913f34; background: rgba(213, 104, 80, .12); font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 800; }
+.error-banner { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: -22px 0 28px; padding: 13px 16px; border: 1px solid rgba(213, 104, 80, .2); border-radius: 12px; color: #913f34; background: rgba(213, 104, 80, .09); font-size: 13px; }
+.error-banner button { flex: 0 0 auto; border: 0; background: transparent; color: inherit; font-size: 20px; cursor: pointer; }
+.empty-workspace { margin-top: 24px; padding: clamp(34px, 6vw, 64px); border: 1px dashed rgba(49, 91, 70, .25); border-radius: 22px; background: rgba(251, 250, 247, .7); text-align: center; }
+.empty-workspace h2 { margin: 0; font-family: 'Manrope', sans-serif; font-size: 28px; letter-spacing: -.04em; }
+.empty-workspace p:not(.auth-eyebrow) { margin: 10px auto 22px; color: var(--muted); }
 
 .auth-shell {
   min-height: 100vh;
@@ -270,6 +284,8 @@ h1 { margin: 0; font-family: 'Manrope', sans-serif; font-size: clamp(38px, 5.4vw
 
 @keyframes fade { from { opacity: 0; } }
 @keyframes rise { from { opacity: 0; transform: translateY(9px) scale(.985); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { opacity: .35; transform: scale(.8); } }
 
 @media (max-width: 900px) {
   .overview { grid-template-columns: 1fr; align-items: stretch; }
@@ -280,6 +296,8 @@ h1 { margin: 0; font-family: 'Manrope', sans-serif; font-size: clamp(38px, 5.4vw
 @media (max-width: 640px) {
   .topbar { padding: 0 18px; height: 68px; }
   .private-pill, .ghost-btn span, .primary-btn .button-label { display: none; }
+  .saving-indicator { font-size: 0; }
+  .saving-indicator > span { display: block; }
   .account-email { display: none; }
   .ghost-btn, .primary-btn { width: 40px; padding: 0; }
   main { width: min(100% - 32px, 1440px); padding-top: 34px; }
