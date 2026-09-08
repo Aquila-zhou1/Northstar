@@ -5,7 +5,8 @@
 
 <p align="center">
   English | <a href="README_CN.md">中文</a> <br>
-  A private, cloud-backed project planner for turning milestones into clear, trackable work.
+  A private, cloud-backed project planner for turning milestones into clear, trackable work. <br>
+  Feel free to try it via <a href="https://northstar-zhou.vercel.app" target="_blank">this link</a>
 </p>
 
 

@@ -5,7 +5,8 @@
 
 <p align="center">
 <a href="README.md">English</a> | 中文 <br>
-  一个私密、云端持久化的项目规划工具，帮助用户把阶段目标拆解成清晰、可追踪的工作。
+  一个私密、云端持久化的项目规划工具，帮助用户把阶段目标拆解成清晰、可追踪的工作。<br>
+  欢迎来体验 <a href="https://northstar-zhou.vercel.app" target="_blank">该应用</a>
 </p>
 
 
