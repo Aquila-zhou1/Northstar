@@ -50,7 +50,7 @@
 .calendar-event { position: absolute; z-index: 2; border: 0; border-left: 3px solid #b69a56; border-radius: 4px; background: #e9ddbd; color: #62532b; padding: 4px 7px; overflow: hidden; text-align: left; cursor: pointer; min-width: 0; }
 .calendar-event[data-period="second"] { background: #d6e4cd; border-left-color: #7a9b6a; color: #3c5735; }
 .calendar-event[data-period="third"] { background: #dfd7eb; border-left-color: #a18bb7; color: #625173; }
-.calendar-event strong { display: block; font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.calendar-event strong { display: block; font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .calendar-event small { display: block; font-size: 11px; opacity: .8; margin-top: 2px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .current-time-line { position: absolute; left: 0; right: 0; height: 1px; background: #d46a59; pointer-events: none; z-index: 3; }
 .current-time-line::before { content: ''; position: absolute; left: -3px; top: -2px; width: 5px; height: 5px; background: #d46a59; border-radius: 50%; }
