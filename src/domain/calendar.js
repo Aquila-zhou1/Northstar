@@ -33,15 +33,19 @@ export function eventPayload(form) {
 }
 
 // Each connected overlap group gets enough columns to keep every event clickable.
-export function layoutEvents(events, day) {
+export function calendarPeriod(minutes) {
+  return minutes < 720 ? 'first' : minutes < 1080 ? 'second' : 'third';
+}
+
+export function layoutEvents(events, day, visibleStart = 0) {
   const start = new Date(day); start.setHours(0, 0, 0, 0);
   const end = new Date(start); end.setDate(end.getDate() + 1);
   const minutes = value => value.getHours() * 60 + value.getMinutes();
   const items = events.filter(e => new Date(e.starts_at) < end && new Date(e.ends_at) > start).map(e => ({
     ...e,
-    from: new Date(e.starts_at) < start ? 0 : minutes(new Date(e.starts_at)),
+    from: Math.max(visibleStart, new Date(e.starts_at) < start ? 0 : minutes(new Date(e.starts_at))),
     to: new Date(e.ends_at) >= end ? 1440 : minutes(new Date(e.ends_at))
-  })).sort((a, b) => a.from - b.from || b.to - a.to);
+  })).filter(e => e.to > e.from).sort((a, b) => a.from - b.from || b.to - a.to);
   let group = [], lanes = [], groupEnd = -1;
   function finish() { group.forEach(item => { item.columns = lanes.length; }); group = []; lanes = []; }
   for (const item of items) {

@@ -1,15 +1,16 @@
 <script setup>
+import UserMotto from './UserMotto.vue';
 defineProps({
   userEmail: { type: String, default: '' },
   busy: { type: Boolean, default: false },
   canAddTask: { type: Boolean, default: true },
   plannerActions: { type: Boolean, default: true }
 });
-defineEmits(['reset', 'add-milestone', 'add-task', 'sign-out', 'navigate']);
+defineEmits(['reset', 'add-milestone', 'add-task', 'sign-out', 'navigate', 'motto-busy', 'session-expired']);
 </script>
 
 <template>
-  <header class="topbar">
+  <header class="topbar" :class="{ 'calendar-topbar': !plannerActions }">
     <div class="brand">
       <button class="icon-btn" aria-label="Open navigation" :disabled="busy" @click="$emit('navigate')">☰</button>
       <div class="brand-mark">
@@ -19,8 +20,10 @@ defineEmits(['reset', 'add-milestone', 'add-task', 'sign-out', 'navigate']);
         </svg>
       </div>
       <div class="brand-name">Northstar</div>
-      <span class="private-pill">Private</span>
+      <UserMotto v-if="!plannerActions" :disabled="busy" @busy="$emit('motto-busy', $event)" @session-expired="$emit('session-expired')" />
+      <span v-else class="private-pill">Private</span>
     </div>
+    <div v-if="!plannerActions" id="calendar-navigation" class="calendar-navigation"></div>
     <div class="top-actions">
       <span v-if="busy" class="saving-indicator" role="status"><span></span>Saving</span>
       <span v-if="userEmail" class="account-email" :title="userEmail">{{ userEmail }}</span>

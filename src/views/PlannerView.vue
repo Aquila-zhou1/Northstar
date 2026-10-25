@@ -19,6 +19,7 @@ const router = useRouter();
 const route = useRoute();
 const drawerOpen = ref(false);
 const calendarBusy = ref(false);
+const mottoBusy = ref(false);
 const isCalendar = computed(() => route.name === 'calendar');
 const taskEditorId = ref(undefined);
 const milestoneEditorId = ref(undefined);
@@ -93,20 +94,22 @@ watch(() => auth.isAuthenticated.value, authenticated => {
 </script>
 
 <template>
-  <div class="shell">
+  <div class="shell" :class="{ 'calendar-shell': isCalendar }">
     <AppHeader
       :user-email="auth.user.value?.email || ''"
-      :busy="planner.saving.value || signingOut || calendarBusy"
+      :busy="planner.saving.value || signingOut || calendarBusy || mottoBusy"
       :planner-actions="!isCalendar"
       :can-add-task="planner.ready.value && planner.state.milestones.length > 0 && !isCalendar"
       @navigate="drawerOpen = true"
+      @motto-busy="mottoBusy = $event"
+      @session-expired="handleSessionExpired"
       @reset="resetOpen = true"
       @add-milestone="openMilestone()"
       @add-task="openTask()"
       @sign-out="signOut"
     />
     <NavigationDrawer v-if="drawerOpen" @close="drawerOpen = false" />
-    <main v-if="isCalendar"><WeeklyCalendar @session-expired="handleSessionExpired" @busy="calendarBusy = $event" /></main>
+    <main v-if="isCalendar" class="calendar-main"><WeeklyCalendar :disabled="mottoBusy || signingOut" @session-expired="handleSessionExpired" @busy="calendarBusy = $event" /></main>
     <main v-else-if="planner.loading.value" class="workspace-state" aria-live="polite" aria-busy="true">
       <div class="state-spinner" aria-hidden="true"></div>
       <h1 class="state-title">Loading your workspace…</h1>

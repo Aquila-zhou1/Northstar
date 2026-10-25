@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, eventPayload, layoutEvents, weekDays } from '../src/domain/calendar.js';
+import { calendarPeriod, dateKey, eventPayload, layoutEvents, weekDays } from '../src/domain/calendar.js';
 
 test('Sunday and year boundaries resolve to a Monday–Sunday local week', () => {
   const days = weekDays(new Date(2027, 0, 3, 15));
@@ -56,4 +56,24 @@ test('daylight saving skips nonexistent local times without silently shifting sc
   assert.throws(() => eventPayload({ title: 'Spring', date: '2026-03-08', start: '02:00', end: '03:30' }), /does not exist/);
   const autumn = eventPayload({ title: 'Fall day', date: '2026-11-01', start: '00:00', end: '24:00' });
   assert.equal((new Date(autumn.ends_at) - new Date(autumn.starts_at)) / 3600000, 25);
+});
+
+test('06:00 viewport clips old events without shifting their original timestamps', () => {
+  const day = new Date(2026, 9, 24);
+  const early = { id: 'early', ...eventPayload({ title: 'Early', date: dateKey(day), start: '04:00', end: '05:00' }) };
+  const crossing = { id: 'crossing', ...eventPayload({ title: 'Crossing', date: dateKey(day), start: '05:30', end: '06:30' }) };
+  const items = layoutEvents([early, crossing], day, 360);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].from, 360);
+  assert.equal(items[0].to, 390);
+  assert.equal(new Date(items[0].starts_at).getHours(), 5);
+  assert.equal(layoutEvents([early, crossing], day).length, 2);
+});
+
+test('event colors change exactly at 12:00 and 18:00', () => {
+  assert.equal(calendarPeriod(360), 'first');
+  assert.equal(calendarPeriod(719), 'first');
+  assert.equal(calendarPeriod(720), 'second');
+  assert.equal(calendarPeriod(1079), 'second');
+  assert.equal(calendarPeriod(1080), 'third');
 });

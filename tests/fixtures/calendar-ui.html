@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Northstar calendar UI test</title></head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    // Development-only fixture using real components and isolated in-memory data.
+    // It is not a production route and never writes to Supabase.
+    import { createApp, h, ref } from 'vue';
+    import AppHeader from '../../src/components/AppHeader.vue';
+    import WeeklyCalendar from '../../src/components/WeeklyCalendar.vue';
+    import { useAuth } from '../../src/composables/useAuth.js';
+    import { calendarRepository } from '../../src/services/calendarRepository.js';
+    import { userSettingsRepository } from '../../src/services/userSettingsRepository.js';
+    import { dateKey, eventPayload, weekDays } from '../../src/domain/calendar.js';
+    import '../../src/style.css';
+
+    const params = new URLSearchParams(location.search);
+    const failSave = params.has('failSave');
+    let mottoAttempts = 0;
+    let motto = params.has('longMotto') ? 'Take the time to do what matters, and keep making steady progress toward the things you believe in.' : 'Make time for what matters.';
+    const auth = useAuth();
+    auth.session.value = { user: { id: 'ui-fixture-user', email: 'fixture@example.invalid' } };
+    userSettingsRepository.loadMotto = async () => motto;
+    userSettingsRepository.saveMotto = async (_id, value) => {
+      if (failSave && mottoAttempts++ === 0) throw new Error('Simulated offline save');
+      motto = value;
+      return motto;
+    };
+    const week = weekDays(new Date());
+    let events = [[0,'09:00','10:30','Project proposal'],[1,'14:00','15:30','Focused work'],[2,'19:00','20:00','Read a chapter'],[3,'11:30','12:30','Design review']].map(([day,start,end,title],i)=>({ id: `fixture-${i}`, ...eventPayload({ date: dateKey(week[day]), start, end, title }) }));
+    calendarRepository.load = async (start,end) => events.filter(event => new Date(event.starts_at)<end && new Date(event.ends_at)>start);
+    calendarRepository.save = async (payload,id) => {
+      const result = { ...payload, id: id || `fixture-${Date.now()}` };
+      events = [...events.filter(event => event.id !== result.id), result];
+      return result;
+    };
+    calendarRepository.remove = async id => { events = events.filter(event => event.id !== id); };
+    createApp({
+      setup() {
+        const busy = ref(false), mottoBusy = ref(false);
+        return () => h('div', { class: 'shell calendar-shell' }, [
+          h(AppHeader, { plannerActions: false, busy: busy.value || mottoBusy.value, onMottoBusy: value => { mottoBusy.value = value; } }),
+          h('main', { class: 'calendar-main' }, [h(WeeklyCalendar, { disabled: mottoBusy.value, onBusy: value => { busy.value = value; } })])
+        ]);
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
