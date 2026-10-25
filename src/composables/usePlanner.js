@@ -148,6 +148,7 @@ async function deleteMilestone(milestoneId) {
   const result = await runMutation(async () => {
     await plannerRepository.deleteMilestone(state.projectId, milestoneId);
     state.milestones = state.milestones.filter(milestone => milestone.id !== milestoneId);
+    state.tasks = state.tasks.filter(task => task.milestoneId !== milestoneId);
     if (activeMilestone.value === milestoneId) activeMilestone.value = 'all';
   }, 'Milestone deleted', 'delete this milestone');
   return result.ok;

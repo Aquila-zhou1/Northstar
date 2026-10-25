@@ -29,6 +29,12 @@ const router = createRouter({
       meta: { guestOnly: true }
     },
     {
+      path: '/app/calendar',
+      name: 'calendar',
+      component: PlannerView,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/app',
       name: 'planner',
       component: PlannerView,

@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import NavigationDrawer from '../components/NavigationDrawer.vue';
+import WeeklyCalendar from '../components/WeeklyCalendar.vue';
 import AppHeader from '../components/AppHeader.vue';
 import MilestoneEditorModal from '../components/MilestoneEditorModal.vue';
 import MilestoneList from '../components/MilestoneList.vue';
@@ -14,6 +16,10 @@ import { useAuth } from '../composables/useAuth';
 const planner = usePlanner();
 const auth = useAuth();
 const router = useRouter();
+const route = useRoute();
+const drawerOpen = ref(false);
+const calendarBusy = ref(false);
+const isCalendar = computed(() => route.name === 'calendar');
 const taskEditorId = ref(undefined);
 const milestoneEditorId = ref(undefined);
 const resetOpen = ref(false);
@@ -24,8 +30,13 @@ const editedMilestone = computed(() => planner.state.milestones.find(milestone =
 const assignedCount = computed(() => editedMilestone.value ? planner.state.tasks.filter(task => task.milestoneId === editedMilestone.value.id).length : 0);
 const preferredMilestone = computed(() => planner.activeMilestone.value !== 'all' ? planner.activeMilestone.value : planner.state.milestones[0]?.id || '');
 
-function openTask(taskId = null) { if (!planner.saving.value) taskEditorId.value = taskId; }
-function openMilestone(milestoneId = null) { if (!planner.saving.value) milestoneEditorId.value = milestoneId; }
+function openTask(taskId = null) { if (!planner.saving.value && planner.ready.value && planner.state.milestones.length) taskEditorId.value = taskId; }
+function openMilestone(milestoneId = null) {
+  if (!planner.saving.value && planner.ready.value) {
+    planner.dismissMutationError();
+    milestoneEditorId.value = milestoneId;
+  }
+}
 
 async function submitTask(payload) {
   if (await planner.saveTask(payload, taskEditorId.value)) taskEditorId.value = undefined;
@@ -63,13 +74,17 @@ async function signOut() {
 
 onMounted(planner.initialize);
 
-watch(() => planner.authExpired.value, async expired => {
-  if (!expired) return;
+async function handleSessionExpired() {
   try {
     await auth.signOut('local');
+  } catch {
+    // The route guard handles a session already removed by Auth.
   } finally {
     await router.replace({ name: 'login', query: { reason: 'session-expired' } });
   }
+}
+watch(() => planner.authExpired.value, expired => {
+  if (expired) handleSessionExpired();
 });
 
 watch(() => auth.isAuthenticated.value, authenticated => {
@@ -81,13 +96,18 @@ watch(() => auth.isAuthenticated.value, authenticated => {
   <div class="shell">
     <AppHeader
       :user-email="auth.user.value?.email || ''"
-      :busy="planner.saving.value || signingOut"
+      :busy="planner.saving.value || signingOut || calendarBusy"
+      :planner-actions="!isCalendar"
+      :can-add-task="planner.ready.value && planner.state.milestones.length > 0 && !isCalendar"
+      @navigate="drawerOpen = true"
       @reset="resetOpen = true"
       @add-milestone="openMilestone()"
       @add-task="openTask()"
       @sign-out="signOut"
     />
-    <main v-if="planner.loading.value" class="workspace-state" aria-live="polite" aria-busy="true">
+    <NavigationDrawer v-if="drawerOpen" @close="drawerOpen = false" />
+    <main v-if="isCalendar"><WeeklyCalendar @session-expired="handleSessionExpired" @busy="calendarBusy = $event" /></main>
+    <main v-else-if="planner.loading.value" class="workspace-state" aria-live="polite" aria-busy="true">
       <div class="state-spinner" aria-hidden="true"></div>
       <h1 class="state-title">Loading your workspace…</h1>
       <p>Connecting to your private Northstar plan.</p>
@@ -115,6 +135,7 @@ watch(() => auth.isAuthenticated.value, authenticated => {
         <p class="auth-eyebrow">Nothing here yet</p>
         <h2>Your workspace is empty.</h2>
         <p>Restore the example plan, then shape it around your real project.</p>
+        <button class="ghost-btn" :disabled="planner.saving.value" @click="openMilestone()">Add your first milestone</button>
         <button class="primary-btn" :disabled="planner.saving.value" @click="planner.resetWorkspace">
           {{ planner.saving.value ? 'Restoring…' : 'Restore example workspace' }}
         </button>
@@ -157,7 +178,7 @@ watch(() => auth.isAuthenticated.value, authenticated => {
       :key="milestoneEditorId || 'new'"
       :milestone="editedMilestone"
       :assigned-count="assignedCount"
-      :milestone-count="planner.state.milestones.length"
+      :error-message="planner.mutationError.value"
       :pending="planner.saving.value"
       @close="milestoneEditorId = undefined"
       @save="submitMilestone"

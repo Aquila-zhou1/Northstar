@@ -166,7 +166,9 @@ export const plannerRepository = {
       .from('milestones')
       .delete()
       .eq('id', milestoneId)
-      .eq('project_id', projectId);
+      .eq('project_id', projectId)
+      .select('id')
+      .single();
     throwIfError(error);
   },
 
