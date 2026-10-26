@@ -88,7 +88,7 @@ async function resend() {
       <p v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</p>
       <p v-if="noticeMessage" class="form-notice" role="status">{{ noticeMessage }}</p>
       <button class="primary-btn auth-submit" type="submit" :disabled="pending || token.length !== 6">
-        {{ pending ? 'Verifying…' : 'Verify and continue' }}
+        {{ pending ? 'Verifying…' : 'Verify' }}
       </button>
     </form>
 

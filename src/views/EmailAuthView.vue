@@ -59,7 +59,7 @@ async function submit() {
       </div>
       <p v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</p>
       <button class="primary-btn auth-submit" type="submit" :disabled="pending">
-        {{ pending ? 'Sending…' : 'Send verification code' }}
+        {{ pending ? 'Sending…' : 'Send code' }}
       </button>
     </form>
 
